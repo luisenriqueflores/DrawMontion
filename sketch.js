@@ -1,6 +1,6 @@
 
 var currentFrame=0;
-var targetSpeed=20;
+var targetSpeed=30;
 var speedIncrement=.05;
 var waitTimeatSpeed=60*10;//10 seconds
 var speed=3;
@@ -26,6 +26,7 @@ function setup() {
     
   createCanvas(windowWidth, windowHeight);
   audioPlayer = createAudio('/assets/audio.mp3');
+  audioPlayer.onended(()=>{freeze=true;});
   
   audioPlayer.attribute(
     'aria-description',
@@ -45,7 +46,7 @@ function setup() {
   colorMode(HSB);
   
   // Get the current gap and offset values from the sliders
-  createBackground();
+  //createBackground();
   changeColor();
 }
 
@@ -55,10 +56,11 @@ function draw()
   
   if(freeze==true) {
     background(255);
-    text("Click on the mouse to start", windowWidth/2, windowHeight/2);    
+    textSize(32);
+    text("Click to start", windowWidth/2, windowHeight/2);    
     return;
   }
-  if(currentFrame>=20000) freeze==true;
+  
   currentFrame+=speed;
   frameCounter++;    
   if(frameCounter == 1) //Push a coordinate every 10 frames
@@ -99,17 +101,24 @@ var lineColor=90;
 function drawLines()
 {  
   
- 
-  let startx=0;
-  let starty=0;    
+  strokeCap(SQUARE);   
+  let startx=-10;
+  let starty=-10;    
   for(let i=0; i < coords.length-1; i++)
   {
     if(coords[i].frame+width>currentFrame)
     {
       let offset=coords[i].frame-currentFrame; 
-      stroke(coords[i].color, 90, 90);     
-      strokeWeight(coords[i].size,);       
-      line( startx,starty, coords[i].x+offset, coords[i].y )
+      stroke(coords[i].color, 90, 90,1);     
+      strokeWeight(coords[i].size/10);    
+      
+      for(let j=0;j<10;j++){
+        let of=(coords[i].size/10)*j;
+        if(j>2 &&  j<8)
+          line( startx+of,starty+of, coords[i].x+offset+of, coords[i].y+of);      
+        else if(random(0, 1)>.1)
+          line(startx+of,starty+of, coords[i].x+offset+of, coords[i].y+of);      
+      }
       startx=coords[i].x+offset;
       starty=coords[i].y;      
     }
@@ -125,24 +134,6 @@ function changeColor()
     changeColor();
   }, (500));
   
-}
-
-
-
-function createBackground()
-{
-  gap = windowWidth/10;
-  offset = cont+=100;
-  // Loop through x and y coordinates, at increments set by gap
-  for (let x = gap / 2; x < width*2; x += gap) {
-    for (let y = gap / 2; y < height*2; y += gap) {
-      // Calculate noise value using scaled and offset coordinates
-      let noiseValue = noise((x + offset) * xScale, (y ) * yScale);
-      let diameter = noiseValue * gap;
-      
-      circleMap.push({x:x, y:y, diameter:diameter});      
-    }
-  }
 }
 
 function mouseClicked() {
@@ -167,21 +158,12 @@ function drawBG(){
   // Loop through x and y coordinates, at increments set by gap
   for (let x = gap / 2; x < width*2; x += gap) {
     for (let y = gap / 2; y < height*2; y += gap) {
-      // Calculate noise value using scaled and offset coordinates
       let noiseValue = noise((x + offset) * xScale, (y ) * yScale);
       let diameter = noiseValue * gap;      
-      //circleMap.push({x:x, y:y, diameter:diameter});      
       var rand=random(0, 50).valueOf();
       fill(rand);    
       circle(x-cont, y, diameter);
     }
   }
   cont+=1;
-  return;
-  for (let i = 0; i < circleMap.length; i++) {
-    if(cont>width) cont=0;
-    if(circleMap[i].x-cont>width) continue;   
-    circle(circleMap[i].x-cont, circleMap[i].y, circleMap[i].diameter);
-  }
-  cont+=20;
 }
